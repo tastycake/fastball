@@ -1,4 +1,5 @@
 require 'fastball'
+require 'pry'
 
 module Fastball
   class CLI
@@ -32,7 +33,7 @@ module Fastball
     def run
       case @command
       when 'config'
-        Fastball::Config.generate
+        Fastball::Config.generate(argv[0])
       when 'help'
         puts help_text
       else

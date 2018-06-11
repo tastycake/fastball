@@ -24,7 +24,7 @@ module Fastball
   #
   # The generated config files will have the same path as the config templates
   # but with the +.erb+ extension removed.
-  # 
+  #
   #     config/database.yml.erb --> rake fastball:config --> config/database.yml
   #
   # You should <b>never edit the generated config file</b> by hand because Fastball will
@@ -80,19 +80,22 @@ module Fastball
   #
   class Config
     attr_reader :config
+    attr_reader :environment
 
     extend Forwardable
     def_delegators Fastball, :headline, :progress
 
     class << self
       # See {Config} for information about +.generate+.
-      def generate
-        self.new.generate
+      def generate(environment=nil)
+        self.new.generate environment
       end
     end
 
     # See {Config} for information about +#generate+.
-    def generate
+    def generate(environment=nil)
+      @environment ||= environment
+
       load_config_values
 
       headline "Rendering config files from provided templates.\n"
@@ -117,12 +120,14 @@ module Fastball
     end
 
     def load_config_hash
-      if File.exists?('app_config.yml')
-        YAML.load File.read('app_config.yml')
-      elsif File.exists?('app_config.json')
-        JSON.parse File.read('app_config.json')
+      file = @environment ? "app_config.#{@environment}" : 'app_config'
+
+      if File.exists?("#{file}.yml")
+        YAML.load File.read("#{file}.yml")
+      elsif File.exists?("#{file}.json")
+        JSON.parse File.read("#{file}.json")
       else
-        raise MissingAppConfig.new("expecting app_config.yml to exist in the current directory")
+        raise MissingAppConfig.new("expecting #{file}.yml to exist in the current directory")
       end
     end
 
